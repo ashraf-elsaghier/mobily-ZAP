@@ -155,112 +155,143 @@
 /** @type {import('next').NextConfig} */
 const { i18n } = require("./next-i18next.config");
 
+// --- 1. CONFIGURATION FLAGS ---
 const isProd = process.env.NODE_ENV === "production";
+const isDev = !isProd;
 
-// 🔐 CSP Arrays
-const scriptSources = [
+// --- 2. CSP SOURCE ARRAYS ---
+let styleSources = [
   "'self'",
-  "https://*.googleapis.com",
-  "https://*.google.com",
-  "https://www.googletagmanager.com",
-  "https://www.google-analytics.com",
-  "https://www.clarity.ms",
-  "https://salesiq.zoho.com",
-  "https://js.zohocdn.com",
-];
-
-const styleSources = [
-  "'self'",
+  "'unsafe-inline'", // required for Next.js styles and some inline chunks
   "https://fonts.googleapis.com",
+  "https://cdnjs.cloudflare.com",
   "https://stackpath.bootstrapcdn.com",
   "https://css.zohocdn.com",
 ];
 
-const connectSources = [
+let scriptSources = [
+  "'self'",
+  "https://*.googleapis.com",
+  "https://*.google.com",
+  "https://www.googletagmanager.com",
+];
+
+let connectSources = [
   "'self'",
   "https://api.fms.mobily.saferoad.net",
   "wss://socketio.fms.mobily.saferoad.net",
   "https://www.google-analytics.com",
-  "https://region1.google-analytics.com",
   "https://*.googleapis.com",
   "https://*.google.com",
-  "https://www.clarity.ms",
-  "https://*.zohocdn.com",
-  "https://salesiq.zoho.com",
 ];
 
-const imageSources = [
+let imageSources = [
   "'self'",
   "data:",
   "blob:",
   "https://res.cloudinary.com",
   "https://*.googleapis.com",
   "https://*.gstatic.com",
-  "https://www.google.com",
-  "https://www.clarity.ms",
-  "https://img.zohocdn.com",
 ];
 
-const fontSources = [
+let fontSources = [
   "'self'",
   "data:",
   "https://fonts.gstatic.com",
+  "https://cdnjs.cloudflare.com",
+  "https://stackpath.bootstrapcdn.com",
   "https://css.zohocdn.com",
 ];
 
-// ✅ Only allow unsafe-inline in development
-// if (!isProd) {
-scriptSources.push("'unsafe-eval'", "'unsafe-inline'");
-styleSources.push("'unsafe-inline'");
-connectSources.push("http:", "ws:");
-imageSources.push("http:");
-// }
+// --- 3. CONDITIONAL ADDITIONS FOR DEVELOPMENT ---
+if (isDev) {
+  // Fixes eval/inline issues in dev tools
+  scriptSources.push("'unsafe-eval'");
+  scriptSources.push("'unsafe-inline'");
+  styleSources.push("'unsafe-inline'");
+  connectSources.push("http:");
+  connectSources.push("ws:");
+  imageSources.push("http:");
+}
 
-// ✅ Final CSP
+// --- 4. BUILD FINAL CSP STRING ---
 const csp = `
   default-src 'self';
-  base-uri 'self';
   object-src 'none';
+  base-uri 'self';
   frame-ancestors 'none';
-  form-action 'self';
   upgrade-insecure-requests;
-
+  form-action 'self';
   script-src ${scriptSources.join(" ")};
   style-src ${styleSources.join(" ")};
+  style-src-elem ${styleSources.join(" ")};
   img-src ${imageSources.join(" ")};
   connect-src ${connectSources.join(" ")};
   font-src ${fontSources.join(" ")};
-  frame-src 'self' https://*.google.com https://salesiq.zoho.com;
+  frame-src 'self' https://*.google.com;
   worker-src 'self' blob:;
   child-src 'self' blob:;
 `;
 
+// Clean up spaces
+const cspValue = csp.replace(/\s+/g, " ").trim();
+
+// --- 5. SECURITY HEADERS ---
 const securityHeaders = [
   {
     key: "Content-Security-Policy",
-    value: csp.replace(/\s+/g, " ").trim(),
+    value: cspValue,
   },
-  { key: "X-Frame-Options", value: "DENY" },
-  { key: "X-Content-Type-Options", value: "nosniff" },
-  { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+  {
+    key: "X-Frame-Options",
+    value: "DENY",
+  },
+  {
+    key: "X-Content-Type-Options",
+    value: "nosniff",
+  },
+  {
+    key: "Referrer-Policy",
+    value: "strict-origin-when-cross-origin",
+  },
+  {
+    key: "X-XSS-Protection",
+    value: "1; mode=block",
+  },
+  {
+    key: "X-Powered-By",
+    value: "",
+  },
   {
     key: "Permissions-Policy",
     value: "camera=(), microphone=(), geolocation=()",
   },
-  { key: "Cross-Origin-Resource-Policy", value: "same-origin" },
-  { key: "Cross-Origin-Opener-Policy", value: "same-origin" },
-  { key: "Cross-Origin-Embedder-Policy", value: "require-corp" },
+
+  // --- Fix Cloudinary / Cross-Origin image blocking ---
+  {
+    key: "Cross-Origin-Embedder-Policy",
+    value: "unsafe-none",
+  },
+  {
+    key: "Cross-Origin-Opener-Policy",
+    value: "same-origin-allow-popups",
+  },
 ];
 
+// --- 6. NEXT CONFIG EXPORT ---
 const nextConfig = {
   reactStrictMode: true,
   i18n,
-  swcMinify: true,
+  swcMinify: false,
+  keySeparator: ".",
+  returnEmptyString: false,
+  reloadOnPrerender: isDev,
   poweredByHeader: false,
+
   async headers() {
     return [
       {
-        source: "/(.*)",
+        source: "/(.*)", // apply to all routes
         headers: securityHeaders,
       },
     ];
