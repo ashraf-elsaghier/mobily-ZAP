@@ -153,7 +153,6 @@
 
 // module.exports = nextConfig;
 
-// next.config.js
 /** @type {import('next').NextConfig} */
 const { i18n } = require("./next-i18next.config");
 
@@ -165,21 +164,21 @@ const isProd = process.env.NODE_ENV === "production";
 const csp = [
   "default-src 'self'",
   // Next.js and our app inject inline styles (styled-jsx), so 'unsafe-inline' for style is needed unless we migrate to nonces
-  "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com https://stackpath.bootstrapcdn.com",
+  "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com https://stackpath.bootstrapcdn.com https://css.zohocdn.com https://*.zohocdn.com",
   // We currently load and init scripts for GTM/GA, Microsoft Clarity and Zoho SalesIQ, plus some inline bootstraps
   "script-src 'self' " +
     (isProd ? "" : "'unsafe-eval' ") +
-    "'unsafe-inline' https://www.googletagmanager.com https://www.google-analytics.com https://www.clarity.ms https://salesiq.zoho.com https://maps.googleapis.com",
+    "'unsafe-inline' https://www.googletagmanager.com https://www.google-analytics.com https://www.clarity.ms https://salesiq.zoho.com https://maps.googleapis.com https://js.zohocdn.com https://*.zohocdn.com",
   // Images, including data URIs and possible analytics pixels
-  "img-src 'self' data: blob: https://www.google-analytics.com https://www.googletagmanager.com https://maps.gstatic.com",
+  "img-src 'self' data: blob: https://www.google-analytics.com https://www.googletagmanager.com https://maps.gstatic.com https://*.zohocdn.com https://salesiq.zoho.com",
   // Fonts
   "font-src 'self' data: https://fonts.gstatic.com https://cdnjs.cloudflare.com https://stackpath.bootstrapcdn.com",
   // Network/API calls and websockets. Refine these hosts as you harden.
-  "connect-src 'self' https: wss: https://www.google-analytics.com https://www.googletagmanager.com https://www.clarity.ms https://salesiq.zoho.com https://maps.googleapis.com https://maps.gstatic.com",
+  "connect-src 'self' https: wss: https://www.google-analytics.com https://www.googletagmanager.com https://www.clarity.ms https://salesiq.zoho.com https://maps.googleapis.com https://maps.gstatic.com https://*.zohocdn.com",
   // We don't expect to be framed by other origins; allow only same-origin framing
   "frame-ancestors 'self'",
   // Allow iframes we embed from our own origin and trusted vendors if needed later (add hosts here)
-  "frame-src 'self' https://www.googletagmanager.com https://www.clarity.ms https://salesiq.zoho.com",
+  "frame-src 'self' https://www.googletagmanager.com https://www.clarity.ms https://salesiq.zoho.com https://*.zohocdn.com",
   // Disallow object/embed entirely
   "object-src 'none'",
 ].join("; ");
@@ -216,12 +215,25 @@ const nextConfig = {
   keySeparator: ".",
   returnEmptyString: false,
   reloadOnPrerender: process.env.NODE_ENV === "development",
+  // Remove X-Powered-By to avoid tech disclosure
+  poweredByHeader: false,
   async headers() {
     // Apply security headers site-wide, plus explicitly for sitemap/robots
     return [
       {
         source: "/(.*)",
-        headers: securityHeaders,
+        headers: [
+          ...securityHeaders,
+          // Additional hardening headers commonly flagged by scanners
+          {
+            key: "Permissions-Policy",
+            value:
+              "geolocation=(), microphone=(), camera=(), payment=(), usb=(), fullscreen=(self), interest-cohort=()",
+          },
+          { key: "X-Permitted-Cross-Domain-Policies", value: "none" },
+          { key: "X-Download-Options", value: "noopen" },
+          { key: "X-DNS-Prefetch-Control", value: "off" },
+        ],
       },
       {
         source: "/sitemap.xml",
