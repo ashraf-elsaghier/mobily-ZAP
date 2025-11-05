@@ -368,6 +368,150 @@
 //   },
 // };
 
+// // module.exports = nextConfig;
+// /** @type {import('next').NextConfig} */
+
+// const { i18n } = require("./next-i18next.config");
+
+// // --- 1. CONFIGURATION FLAGS ---
+// const isProd = process.env.NODE_ENV === "production";
+// const isDev = !isProd;
+
+// // --- 2. CSP SOURCE ARRAYS (Define all allowed sources) ---
+
+// // Font Awesome & Google Fonts sources
+// let styleSources = [
+//   "'self'",
+//   "https://fonts.googleapis.com",
+//   "https://cdnjs.cloudflare.com", // Added for Font Awesome CSS
+//   "https://stackpath.bootstrapcdn.com", // Added for Font Awesome CSS
+// ];
+
+// // Script sources (Google Analytics, Maps, etc.)
+// let scriptSources = [
+//   "'self'",
+//   "https://*.googleapis.com",
+//   "https://*.google.com",
+//   "https://www.googletagmanager.com",
+// ];
+
+// // Connection sources (APIs, WebSockets, Analytics)
+// let connectSources = [
+//   "'self'",
+//   "https://api.fms.mobily.saferoad.net",
+//   "wss://socketio.fms.saferoad.net",
+//   "https://www.google-analytics.com",
+//   "https://*.googleapis.com",
+//   "https://*.google.com",
+// ];
+
+// // Image sources
+// let imageSources = [
+//   "'self'",
+//   "data:",
+//   "blob:",
+//   "https://res.cloudinary.com",
+//   "https://*.googleapis.com",
+//   "https://*.gstatic.com",
+// ];
+
+// // Font sources
+// let fontSources = [
+//   "'self'",
+//   "https:",
+//   "data:",
+//   "https://cdnjs.cloudflare.com", // Added for Font Awesome fonts
+//   "https://stackpath.bootstrapcdn.com", // Added for Font Awesome fonts
+// ];
+
+// // --- 3. CONDITIONAL ADDITIONS FOR DEVELOPMENT (Crucial for HMR/Fast Refresh) ---
+// if (isDev) {
+//   // Fixes: "Refused to execute inline script" (requires 'unsafe-inline')
+//   scriptSources.push("'unsafe-inline'");
+//   // Fixes: "Uncaught EvalError" (requires 'unsafe-eval')
+//   scriptSources.push("'unsafe-eval'");
+
+//   // Allows necessary non-secure connections and styles for local testing
+//   connectSources.push("http:");
+//   connectSources.push("ws:");
+//   imageSources.push("http:");
+
+//   // Allows 'unsafe-inline' for styles in dev mode
+//   styleSources.push("'unsafe-inline'");
+// }
+
+// // --- 4. BUILD THE FINAL CSP STRING ---
+// const csp = `
+//     default-src 'self';
+//     object-src 'none';
+//     base-uri 'self';
+//     frame-ancestors 'none';
+//     upgrade-insecure-requests;
+
+//     script-src ${scriptSources.join(" ")};
+//     style-src ${styleSources.join(" ")};
+//     style-src-elem ${styleSources.join(" ")};
+//     img-src ${imageSources.join(" ")};
+//     connect-src ${connectSources.join(" ")};
+//     font-src ${fontSources.join(" ")};
+
+//     frame-src 'self' https://*.google.com;
+//     worker-src 'self' blob:;
+//     child-src 'self' blob:;
+// `;
+
+// // Clean up the string by removing extra whitespace
+// const cspValue = csp.replace(/\s+/g, " ").trim();
+
+// // --- 5. DEFINE ALL SECURITY HEADERS ---
+// const securityHeaders = [
+//   {
+//     key: "Content-Security-Policy",
+//     value: cspValue,
+//   },
+//   {
+//     key: "Referrer-Policy",
+//     value: "strict-origin-when-cross-origin",
+//   },
+//   {
+//     key: "X-Frame-Options",
+//     value: "DENY",
+//   },
+//   {
+//     key: "X-Content-Type-Options",
+//     value: "nosniff",
+//   },
+//   {
+//     key: "X-XSS-Protection",
+//     value: "1; mode=block",
+//   },
+//   {
+//     key: "Permissions-Policy",
+//     value: "camera=(), microphone=(), geolocation=()",
+//   },
+// ];
+
+// // --- 6. NEXT.JS CONFIGURATION OBJECT ---
+// const nextConfig = {
+//   reactStrictMode: true,
+//   i18n,
+//   // Other existing config options:
+//   swcMinify: false,
+//   keySeparator: ".",
+//   returnEmptyString: false,
+//   reloadOnPrerender: isDev,
+
+//   // Add security headers configuration
+//   async headers() {
+//     return [
+//       {
+//         source: "/(.*)", // Apply to all paths
+//         headers: securityHeaders,
+//       },
+//     ];
+//   },
+// };
+
 // module.exports = nextConfig;
 /** @type {import('next').NextConfig} */
 const { i18n } = require("./next-i18next.config");
@@ -376,17 +520,17 @@ const { i18n } = require("./next-i18next.config");
 const isProd = process.env.NODE_ENV === "production";
 const isDev = !isProd;
 
-// --- 2. CSP SOURCE ARRAYS (Define all allowed sources) ---
+// --- 2. CSP SOURCE ARRAYS (Define all allowed sources for production) ---
 
-// Font Awesome & Google Fonts sources
+// Style sources
 let styleSources = [
   "'self'",
   "https://fonts.googleapis.com",
-  "https://cdnjs.cloudflare.com", // Added for Font Awesome CSS
-  "https://stackpath.bootstrapcdn.com", // Added for Font Awesome CSS
+  "https://cdnjs.cloudflare.com",
+  "https://stackpath.bootstrapcdn.com",
 ];
 
-// Script sources (Google Analytics, Maps, etc.)
+// Script sources
 let scriptSources = [
   "'self'",
   "https://*.googleapis.com",
@@ -398,7 +542,7 @@ let scriptSources = [
 let connectSources = [
   "'self'",
   "https://api.fms.mobily.saferoad.net",
-  "wss://socketio.fms.saferoad.net",
+  "wss://socketio.fms.mobily.saferoad.net",
   "https://www.google-analytics.com",
   "https://*.googleapis.com",
   "https://*.google.com",
@@ -414,29 +558,28 @@ let imageSources = [
   "https://*.gstatic.com",
 ];
 
-// Font sources
+// Font sources (FIXED: Specific domains only to avoid wildcard finding)
 let fontSources = [
   "'self'",
-  "https:",
   "data:",
-  "https://cdnjs.cloudflare.com", // Added for Font Awesome fonts
-  "https://stackpath.bootstrapcdn.com", // Added for Font Awesome fonts
+  "https://fonts.gstatic.com",
+  "https://cdnjs.cloudflare.com",
+  "https://stackpath.bootstrapcdn.com",
 ];
 
 // --- 3. CONDITIONAL ADDITIONS FOR DEVELOPMENT (Crucial for HMR/Fast Refresh) ---
 if (isDev) {
-  // Fixes: "Refused to execute inline script" (requires 'unsafe-inline')
+  // Fixes "Refused to execute inline script" and "Uncaught EvalError"
   scriptSources.push("'unsafe-inline'");
-  // Fixes: "Uncaught EvalError" (requires 'unsafe-eval')
   scriptSources.push("'unsafe-eval'");
 
-  // Allows necessary non-secure connections and styles for local testing
+  // Allows inline styles in dev mode
+  styleSources.push("'unsafe-inline'");
+
+  // Allows necessary non-secure connections and http images for local testing
   connectSources.push("http:");
   connectSources.push("ws:");
   imageSources.push("http:");
-
-  // Allows 'unsafe-inline' for styles in dev mode
-  styleSources.push("'unsafe-inline'");
 }
 
 // --- 4. BUILD THE FINAL CSP STRING ---
@@ -494,7 +637,6 @@ const securityHeaders = [
 const nextConfig = {
   reactStrictMode: true,
   i18n,
-  // Other existing config options:
   swcMinify: false,
   keySeparator: ".",
   returnEmptyString: false,
@@ -504,7 +646,7 @@ const nextConfig = {
   async headers() {
     return [
       {
-        source: "/(.*)", // Apply to all paths
+        source: "/(.*)",
         headers: securityHeaders,
       },
     ];
