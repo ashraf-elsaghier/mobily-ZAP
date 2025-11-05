@@ -226,76 +226,8 @@ export default function TrackTable() {
     [t]
   );
 
-  // const [customColumns, setCustomColumns] = useState([]);
-  // const [filterCol, setFilterCol] = useState([]);
-
-  // useEffect(() => {
-  //   setFilterCol(columns.map((v) => ({ label: v.headerName, value: v.field })));
-  //   setCustomColumns(columns);
-  // }, [columns]);
-
-  // const onChange = (e) => {
-  //   const selectedCol = e?.map((el) =>
-  //     columns.find((col) => col.field === el?.value)
-  //   );
-  //   setCustomColumns(e?.length > 0 ? selectedCol : columns);
-  // };
-
-  // const paginationHandleChange = (e) => {
-  //   gridApi.paginationSetPageSize(e.value);
-  //   setPaginationSize(e.value);
-  // };
-  // const paginationsOptions = useMemo(
-  //   () => [
-  //     { value: 10, label: 10 },
-  //     { value: 20, label: 20 },
-  //     { value: 30, label: 30 },
-  //     { value: 40, label: 40 },
-  //     { value: 50, label: 50 },
-  //     { value: 100, label: 100 },
-  //     { value: 200, label: 200 },
-  //     { value: 300, label: 300 },
-  //     { value: 400, label: 400 },
-  //     { value: 500, label: 500 },
-  //   ],
-  //   [paginationSize]
-  // );
-  // const PaginationPageComponent = (
-  //   <Form.Group
-  //     className=" d-flex align-items-center gap-2  "
-  //     controlId="paginationSizeSelect"
-  //   >
-  //     <Form.Label className="order-1 mb-0">{t("rows_per_page")}</Form.Label>
-  //     <Select
-  //       defaultValue={paginationSize}
-  //       placeholder={paginationSize}
-  //       name="paginationSize"
-  //       options={paginationsOptions}
-  //       onChange={paginationHandleChange}
-  //       isSearchable={false}
-  //       classNamePrefix="select"
-  //       className="order-2"
-  //       styles={colorStyles(darkMode)}
-  //       menuPlacement="top"
-  //     />
-  //   </Form.Group>
-  // );
   return (
     <>
-      {/* <div className="px-4 mt-n3 mb-2 d-flex     justify-content-end ">
-        <div style={{ width: "450px" }}>
-          <Select
-            isMulti
-            options={filterCol}
-            className="basic-multi-select w-100"
-            classNamePrefix="select"
-            placeholder={t("Select Columns to Export")}
-            onChange={onChange}
-            styles={colorStyles(darkMode)}
-          />
-        </div>
-      </div> */}
-
       <Col sm="12" className="mt-5">
         <Card className="mb-0">
           <Card.Body className="px-3 py-0 track-sheet">

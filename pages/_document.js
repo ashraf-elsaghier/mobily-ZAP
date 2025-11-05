@@ -12,11 +12,10 @@ class MyDocument extends Document {
     return (
       <Html
         dir={this.props.locale === "ar" ? "rtl" : "ltr"}
-        lang={this.props.locale}
-      >
+        lang={this.props.locale}>
         <Head>
           <link rel="shortcut icon" href="/favicon.ico" />
-          {/* <link rel="preconnect" href="https://fonts.googleapis.com" />
+          <link rel="preconnect" href="https://fonts.googleapis.com" />
           <link rel="preconnect" href="https://fonts.gstatic.com" />
           <link
             href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&family=Inter:wght@300;400;500;600;700&display=swap"
@@ -33,9 +32,9 @@ class MyDocument extends Document {
             rel="stylesheet"
             type="text/css"
             href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css"
-          /> */}
+          />
           {/* Load Clarity script only in production */}
-          {/* {isProduction && clarityID && (
+          {isProduction && clarityID && (
             <>
               <script
                 type="text/javascript"
@@ -51,8 +50,7 @@ class MyDocument extends Document {
               />
               <script
                 async
-                src={`https://www.googletagmanager.com/gtag/js?id=G-V3S8895Y82`}
-              ></script>
+                src={`https://www.googletagmanager.com/gtag/js?id=G-V3S8895Y82`}></script>
               <script
                 dangerouslySetInnerHTML={{
                   __html: `
@@ -64,7 +62,7 @@ class MyDocument extends Document {
                 }}
               />
             </>
-          )} */}
+          )}
         </Head>
         <body>
           <Main />
