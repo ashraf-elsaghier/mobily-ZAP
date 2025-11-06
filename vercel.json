@@ -5,15 +5,6 @@
       "headers": [{ "key": "X-Frame-Options", "value": "SAMEORIGIN" }]
     },
     {
-      "source": "/_next/(.*)",
-      "headers": [
-        {
-          "key": "Access-Control-Allow-Origin",
-          "value": "https://security-jet.vercel.app"
-        }
-      ]
-    },
-    {
       "source": "/_next/static/(.*)",
       "headers": [
         {
