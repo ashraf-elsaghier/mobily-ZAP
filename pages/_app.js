@@ -89,7 +89,8 @@ function MyApp({ Component, pageProps }) {
           />
           <Script
             defer
-            src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC-qWPc8xQrA-D8TSiNBpjLYBBsS29oU0U&callback=Function.prototype"></Script>
+            src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC-qWPc8xQrA-D8TSiNBpjLYBBsS29oU0U&callback=Function.prototype"
+          ></Script>
 
           <AuthGuard settBtnRef={settBtnRef}>
             <ToastContainer
