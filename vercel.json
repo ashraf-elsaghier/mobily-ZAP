@@ -1,6 +1,10 @@
 {
   "headers": [
     {
+      "source": "/(.*)",
+      "headers": [{ "key": "X-Frame-Options", "value": "SAMEORIGIN" }]
+    },
+    {
       "source": "/_next/(.*)",
       "headers": [
         {
@@ -62,10 +66,6 @@
           "value": "https://security-jet.vercel.app"
         }
       ]
-    },
-    {
-      "source": "/(.*)",
-      "headers": [{ "key": "X-Frame-Options", "value": "SAMEORIGIN" }]
     }
   ]
 }
