@@ -18,12 +18,59 @@ const isProd = process.env.isProd === "true";
 // from your next.config.js if possible, or define them here:
 // For simplicity and deployment reliability, we use the values exported
 // via `process.env` (as defined in the updated next.config.js)
-const scriptSrc = process.env.scriptSources;
-const styleSrc = process.env.styleSources;
-const connectSrc = process.env.connectSources;
-const imageSrc = process.env.imageSources;
-const fontSrc = process.env.fontSources;
+// const scriptSrc = process.env.scriptSources;
+// const styleSrc = process.env.styleSources;
+// const connectSrc = process.env.connectSources;
+// const imageSrc = process.env.imageSources;
+// const fontSrc = process.env.fontSources;
+const styleSrc = [
+  "'self'",
+  "https://fonts.googleapis.com",
+  "https://cdnjs.cloudflare.com",
+  "https://stackpath.bootstrapcdn.com",
+  "https://css.zohocdn.com",
+];
 
+const scriptSrc = [
+  "'self'",
+  "https://*.googleapis.com",
+  "https://*.google.com",
+  "https://www.googletagmanager.com",
+  "https://maps.googleapis.com",
+  "https://maps.gstatic.com",
+];
+
+const connectSrc = [
+  "'self'",
+  "https://api.fms.mobily.saferoad.net",
+  "wss://socketio.fms.mobily.saferoad.net",
+  "wss://socketio.fms.saferoad.net",
+  "https://www.google-analytics.com",
+  "https://*.googleapis.com",
+  "https://*.google.com",
+  "https://maps.googleapis.com",
+  "https://maps.gstatic.com",
+];
+
+const imageSrc = [
+  "'self'",
+  "data:",
+  "blob:",
+  "https://res.cloudinary.com",
+  "https://*.googleapis.com",
+  "https://*.gstatic.com",
+  "https://maps.googleapis.com",
+  "https://maps.gstatic.com",
+];
+
+const fontSrc = [
+  "'self'",
+  "data:",
+  "https://fonts.gstatic.com",
+  "https://cdnjs.cloudflare.com",
+  "https://stackpath.bootstrapcdn.com",
+  "https://css.zohocdn.com",
+];
 export function middleware(request) {
   const nonce = generateNonce();
   const response = NextResponse.next();
