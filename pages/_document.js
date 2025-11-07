@@ -7,7 +7,8 @@ class MyDocument extends Document {
     const initialProps = await Document.getInitialProps(ctx);
 
     // Read the nonce from the request cookies (set by middleware.js)
-    const nonce = ctx.req?.cookies["script-nonce"] || "";
+    const cookies = ctx.req?.cookies;
+    const nonce = cookies ? cookies["script-nonce"] || "" : "";
 
     // Pass the locale and nonce to the render function
     return {
@@ -51,7 +52,7 @@ class MyDocument extends Document {
           />
 
           {/* Load Clarity and GA scripts only in production */}
-          {isProduction && clarityID && (
+          {clarityID && (
             <>
               {/* Apply nonce to the Clarity inline script */}
               <script
