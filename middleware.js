@@ -14,9 +14,6 @@ export function middleware(request) {
   const isDev = process.env.NODE_ENV === "development";
 
   // --- 1. DEFINE YOUR STRICT CSP HEADER ---
-  // IMPORTANT: 'unsafe-inline' is REMOVED from script-src and style-src
-  // The 'nonce-...' value is added instead.
-
   const cspHeader = `
     default-src 'self';
     object-src 'none';
@@ -82,22 +79,12 @@ export function middleware(request) {
   response.headers.set("Content-Security-Policy", cspHeader);
 
   // 3. Set a custom header (X-Nonce) in the RESPONSE so _document.js can read the nonce
-  // Note: While you originally tried cookies, setting a custom response header is a common pattern for Next.js Pages Router
   response.headers.set("X-Nonce", nonce);
 
   return response;
 }
 
-// 4. Configure matcher to skip static assets and speed up build/requests
+// 4. Configure matcher to skip static assets, allowing next.config.js to manage their headers
 export const config = {
-  matcher: [
-    /*
-     * Match all request paths except for the ones starting with:
-     * - api (API routes)
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
-     */
-    "/((?!api|_next/static|_next/image|favicon.ico).*)",
-  ],
+  matcher: ["/((?!api|_next/static|_next/image|favicon.ico).*)"],
 };
