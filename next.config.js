@@ -565,13 +565,106 @@
 
 // next.config.js
 
+// const { i18n } = require("./next-i18next.config");
+
+// const isProd = process.env.NODE_ENV === "production";
+// const isDev = !isProd;
+
+// // --- CSP SOURCES (These are used by middleware.js) ---
+
+// const styleSources = [
+//   "'self'",
+//   "https://fonts.googleapis.com",
+//   "https://cdnjs.cloudflare.com",
+//   "https://stackpath.bootstrapcdn.com",
+//   "https://css.zohocdn.com",
+// ];
+
+// const scriptSources = [
+//   "'self'",
+//   "https://*.googleapis.com",
+//   "https://*.google.com",
+//   "https://www.googletagmanager.com",
+//   "https://maps.googleapis.com",
+//   "https://maps.gstatic.com",
+// ];
+
+// const connectSources = [
+//   "'self'",
+//   "https://api.fms.mobily.saferoad.net",
+//   "wss://socketio.fms.mobily.saferoad.net",
+//   "wss://socketio.fms.saferoad.net",
+//   "https://www.google-analytics.com",
+//   "https://*.googleapis.com",
+//   "https://*.google.com",
+//   "https://maps.googleapis.com",
+//   "https://maps.gstatic.com",
+// ];
+
+// const imageSources = [
+//   "'self'",
+//   "data:",
+//   "blob:",
+//   "https://res.cloudinary.com",
+//   "https://*.googleapis.com",
+//   "https://*.gstatic.com",
+//   "https://maps.googleapis.com",
+//   "https://maps.gstatic.com",
+// ];
+
+// const fontSources = [
+//   "'self'",
+//   "data:",
+//   "https://fonts.gstatic.com",
+//   "https://cdnjs.cloudflare.com",
+//   "https://stackpath.bootstrapcdn.com",
+//   "https://css.zohocdn.com",
+// ];
+
+// if (isDev) {
+//   scriptSources.push("'unsafe-eval'");
+//   styleSources.push("'unsafe-inline'"); // Keep in DEV for convenience
+//   connectSources.push("http:");
+//   connectSources.push("ws:");
+//   imageSources.push("http:");
+// } else {
+//   // Production hash for specific static scripts (keep if you still need it)
+//   scriptSources.push("'sha256-7Ayf/i8gH+ASideztFT+YbgRd62nZdTXp4RbP3P4hjk='");
+// }
+
+// const nextConfig = {
+//   reactStrictMode: true,
+//   i18n,
+//   swcMinify: false,
+//   keySeparator: ".",
+//   returnEmptyString: false,
+//   reloadOnPrerender: isDev,
+//   poweredByHeader: false,
+//   // *** SECURITY HEADERS REMOVED from here and moved to middleware.js ***
+//   async headers() {
+//     return []; // Return empty array since middleware handles headers
+//   },
+//   // We export these sources so we can require/import them in middleware.js
+//   env: {
+//     scriptSources: scriptSources.join(" "),
+//     styleSources: styleSources.join(" "),
+//     connectSources: connectSources.join(" "),
+//     imageSources: imageSources.join(" "),
+//     fontSources: fontSources.join(" "),
+//     isProd: isProd.toString(),
+//   },
+// };
+
+// module.exports = nextConfig;
+
+// next.config.js
+
 const { i18n } = require("./next-i18next.config");
 
 const isProd = process.env.NODE_ENV === "production";
 const isDev = !isProd;
 
-// --- CSP SOURCES (These are used by middleware.js) ---
-
+// --- CSP SOURCES ---
 const styleSources = [
   "'self'",
   "https://fonts.googleapis.com",
@@ -622,29 +715,78 @@ const fontSources = [
 ];
 
 if (isDev) {
+  // 🧩 Development: allow inline/eval for HMR, etc.
   scriptSources.push("'unsafe-eval'");
-  styleSources.push("'unsafe-inline'"); // Keep in DEV for convenience
+  styleSources.push("'unsafe-inline'");
   connectSources.push("http:");
   connectSources.push("ws:");
   imageSources.push("http:");
 } else {
-  // Production hash for specific static scripts (keep if you still need it)
+  // 🧱 Production: remove unsafe-inline and add nonce/hash
+  // Keep one or two fixed script hashes for inline Next.js hydration
   scriptSources.push("'sha256-7Ayf/i8gH+ASideztFT+YbgRd62nZdTXp4RbP3P4hjk='");
+  // Optional: whitelist style hashes for Next.js critical CSS (if warning persists)
+  // styleSources.push("'sha256-AbCdEf123...'"); // add hash if needed later
 }
+
+const ContentSecurityPolicy = `
+  default-src 'self';
+  object-src 'none';
+  base-uri 'self';
+  frame-ancestors 'self';
+  form-action 'self';
+  upgrade-insecure-requests;
+  script-src ${scriptSources.join(" ")};
+  style-src ${styleSources.join(" ")};
+  style-src-elem ${styleSources.join(" ")};
+  img-src ${imageSources.join(" ")};
+  connect-src ${connectSources.join(" ")};
+  font-src ${fontSources.join(" ")};
+  frame-src 'self' https://*.google.com;
+  worker-src 'self' blob:;
+  child-src 'self' blob:;
+`;
 
 const nextConfig = {
   reactStrictMode: true,
-  i18n,
   swcMinify: false,
+  i18n,
   keySeparator: ".",
   returnEmptyString: false,
   reloadOnPrerender: isDev,
   poweredByHeader: false,
-  // *** SECURITY HEADERS REMOVED from here and moved to middleware.js ***
+
   async headers() {
-    return []; // Return empty array since middleware handles headers
+    return [
+      // ✅ Apply CSP
+      {
+        source: "/(.*)",
+        headers: [
+          {
+            key: "Content-Security-Policy",
+            value: ContentSecurityPolicy.replace(/\s{2,}/g, " ").trim(),
+          },
+          {
+            key: "X-Frame-Options",
+            value: "SAMEORIGIN",
+          },
+        ],
+      },
+
+      // ✅ Remove CORS wildcard from Next.js static assets
+      {
+        source: "/_next/:path*",
+        headers: [
+          {
+            key: "Access-Control-Allow-Origin",
+            value: "",
+          },
+        ],
+      },
+    ];
   },
-  // We export these sources so we can require/import them in middleware.js
+
+  // Export to middleware if needed
   env: {
     scriptSources: scriptSources.join(" "),
     styleSources: styleSources.join(" "),
